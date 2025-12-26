@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import TopUp from "./pages/TopUp";
 import Wallet from "./pages/Wallet";
+import Profile from "./pages/Profile";
+import History from "./pages/History";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +29,8 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/topup" element={<TopUp />} />
               <Route path="/wallet" element={<Wallet />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/history" element={<History />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
