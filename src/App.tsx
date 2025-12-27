@@ -1,62 +1,44 @@
-import React, { useState } from 'react';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import TopUp from "./pages/TopUp";
+import Wallet from "./pages/Wallet";
+import Profile from "./pages/Profile";
+import History from "./pages/History";
+import Admin from "./pages/Admin";
+import NotFound from "./pages/NotFound";
 
-export default function App() {
-  const [page, setPage] = useState('home');
-  const [selectedOp, setSelectedOp] = useState('');
-  const [phone, setPhone] = useState('');
-  const [amount, setAmount] = useState('');
+const queryClient = new QueryClient();
 
-  // Telegram ချိတ်ဆက်မှု
-  const sendOrder = async () => {
-    const token = "8593768099:AAFJ7DVSy0XGSzPB8vmztX909ayKNrBnn1g";
-    const chatid = "7368604341";
-    const text = `🔔 Order New!\nOperator: ${selectedOp}\nPhone: ${phone}\nAmount: ${amount}`;
-    
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatid}&text=${encodeURIComponent(text)}`);
-    alert("အော်ဒါတင်ပြီးပါပြီ။ Telegram သို့ ပို့လိုက်ပါပြီ!");
-    setPage('home');
-  };
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/topup" element={<TopUp />} />
+              <Route path="/wallet" element={<Wallet />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </LanguageProvider>
+  </QueryClientProvider>
+);
 
-  return (
-    <div style={{ background: '#121212', color: '#d4af37', minHeight: '100vh', padding: '20px', fontFamily: 'sans-serif' }}>
-      {page === 'home' && (
-        <div style={{ textAlign: 'center' }}>
-          <h1>PHYO LAY WALLET</h1>
-          <button onClick={() => setPage('topup')} style={{ background: '#d4af37', padding: '15px 40px', fontSize: '20px', margin: '20px', borderRadius: '10px' }}>TOP UP</button>
-          <button onClick={() => setPage('admin')} style={{ background: 'gray', padding: '10px 20px', display: 'block', margin: 'auto' }}>ADMIN</button>
-        </div>
-      )}
-
-      {page === 'topup' && (
-        <div style={{ textAlign: 'center' }}>
-          <h2>Select Operator</h2>
-          {['MPT', 'ATOM', 'Ooredoo', 'Mytel', 'AIS', 'DTAC', 'TrueMove'].map(op => (
-            <button key={op} onClick={() => { setSelectedOp(op); setPage('form'); }} style={{ background: '#333', color: 'gold', padding: '15px', margin: '10px', width: '120px', border: '1px solid gold' }}>
-              {op}
-            </button>
-          ))}
-          <button onClick={() => setPage('home')} style={{ display: 'block', margin: '20px auto' }}>Back</button>
-        </div>
-      )}
-
-      {page === 'form' && (
-        <div style={{ textAlign: 'center', maxWidth: '300px', margin: 'auto' }}>
-          <h2>{selectedOp} Top-up</h2>
-          <input placeholder="Phone Number" onChange={e => setPhone(e.target.value)} style={{ width: '100%', padding: '10px', margin: '10px 0' }} />
-          <input placeholder="Amount" onChange={e => setAmount(e.target.value)} style={{ width: '100%', padding: '10px', margin: '10px 0' }} />
-          <button onClick={sendOrder} style={{ background: 'gold', padding: '10px 20px', width: '100%' }}>Confirm Order</button>
-          <button onClick={() => setPage('topup')} style={{ margin: '10px' }}>Back</button>
-        </div>
-      )}
-
-      {page === 'admin' && (
-        <div style={{ textAlign: 'center' }}>
-          <h2>Admin Login</h2>
-          <p>User: hsthst12 / Pass: 121212</p>
-          <button onClick={() => setPage('home')}>Back</button>
-        </div>
-      )}
-    </div>
-  );
-                                                           }
-                                                                                        
+export default App;
