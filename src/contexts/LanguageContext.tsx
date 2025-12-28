@@ -31,8 +31,17 @@ const translations: Translations = {
   myanmarMobile: { en: 'Myanmar Mobile', my: 'မြန်မာ ဖုန်း' },
   thaiMobile: { en: 'Thai Mobile', my: 'ထိုင်း ဖုန်း' },
   gameTopUp: { en: 'Game Top-up', my: 'ဂိမ်းငွေဖြည့်' },
-  giftCards: { en: 'Gift Cards', my: 'လက်ဆောင်ကတ်' },
+  onlineShopping: { en: 'Online Shopping', my: 'အွန်လိုင်းစျေးဝယ်' },
+  shopDescription: { en: 'Shop Products', my: 'ပစ္စည်းဝယ်ယူရန်' },
   walletExchange: { en: 'Wallet Exchange', my: 'ငွေလဲလှယ်ခြင်း' },
+  shopping: { en: 'Shopping', my: 'စျေးဝယ်' },
+  buyNow: { en: 'Buy Now', my: 'ယခုဝယ်ရန်' },
+  productDetails: { en: 'Product Details', my: 'ပစ္စည်းအသေးစိတ်' },
+  addProduct: { en: 'Add Product', my: 'ပစ္စည်းထည့်ရန်' },
+  productName: { en: 'Product Name', my: 'ပစ္စည်းအမည်' },
+  price: { en: 'Price', my: 'စျေးနှုန်း' },
+  image: { en: 'Image', my: 'ပုံ' },
+  description: { en: 'Description', my: 'ဖော်ပြချက်' },
   
   // Wallet
   balance: { en: 'Balance', my: 'လက်ကျန်ငွေ' },

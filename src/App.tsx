@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import TopUp from "./pages/TopUp";
 import Wallet from "./pages/Wallet";
 import Deposit from "./pages/Deposit";
+import Shopping from "./pages/Shopping";
 import Profile from "./pages/Profile";
 import History from "./pages/History";
 import Admin from "./pages/Admin";
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/topup" element={<TopUp />} />
               <Route path="/wallet" element={<Wallet />} />
               <Route path="/deposit" element={<Deposit />} />
+              <Route path="/shopping" element={<Shopping />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/history" element={<History />} />
               <Route path="/admin" element={<Admin />} />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Smartphone, Gamepad2, Gift, Wallet, ArrowRight, Shield, Zap, Clock } from 'lucide-react';
+import { Smartphone, Gamepad2, ShoppingBag, Wallet, ArrowRight, Shield, Zap, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,11 +12,11 @@ const Index: React.FC = () => {
   const { user } = useAuth();
 
   const categories = [
-    { icon: Smartphone, title: t('myanmarMobile'), description: 'MPT, ATOM, Ooredoo, Mytel', color: 'from-emerald-500 to-teal-600' },
-    { icon: Smartphone, title: t('thaiMobile'), description: 'AIS, DTAC, TrueMove', color: 'from-blue-500 to-indigo-600' },
-    { icon: Gamepad2, title: t('gameTopUp'), description: 'Free Fire, Mobile Legends', color: 'from-purple-500 to-pink-600' },
-    { icon: Gift, title: t('giftCards'), description: 'Google Play, iTunes', color: 'from-orange-500 to-red-600' },
-    { icon: Wallet, title: t('walletExchange'), description: 'MMK ↔ THB', color: 'from-primary to-gold-light' },
+    { icon: Smartphone, title: t('myanmarMobile'), description: 'MPT, ATOM, Ooredoo, Mytel', color: 'from-emerald-500 to-teal-600', link: '/topup' },
+    { icon: Smartphone, title: t('thaiMobile'), description: 'AIS, DTAC, TrueMove', color: 'from-blue-500 to-indigo-600', link: '/topup' },
+    { icon: Gamepad2, title: t('gameTopUp'), description: 'Free Fire, Mobile Legends', color: 'from-purple-500 to-pink-600', link: '/topup' },
+    { icon: ShoppingBag, title: t('onlineShopping'), description: t('shopDescription'), color: 'from-orange-500 to-red-600', link: '/shopping' },
+    { icon: Wallet, title: t('walletExchange'), description: 'MMK ↔ THB', color: 'from-primary to-gold-light', link: '/wallet' },
   ];
 
   const features = [
@@ -107,7 +107,7 @@ const Index: React.FC = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Link
-                  to="/topup"
+                  to={category.link}
                   className="card-premium p-6 flex flex-col items-center text-center hover:border-primary/50 transition-all duration-300 group gold-border-glow"
                 >
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
