@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Wallet, User, LogOut, Shield, Globe } from 'lucide-react';
+import { Menu, X, Wallet, User, LogOut, Shield, Globe, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,6 +24,7 @@ const Header: React.FC = () => {
   const navItems = [
     { label: t('home'), href: '/' },
     { label: t('topUp'), href: '/topup' },
+    { label: t('shopping'), href: '/shopping' },
     ...(user ? [{ label: t('wallet'), href: '/wallet' }] : []),
     ...(user ? [{ label: t('history'), href: '/history' }] : []),
   ];

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Smartphone, Gamepad2, Gift, Wallet, Phone, X } from 'lucide-react';
+import { Smartphone, Gamepad2, Wallet, Phone } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,7 +32,6 @@ const iconMap: { [key: string]: React.ComponentType<any> } = {
   smartphone: Smartphone,
   phone: Phone,
   'gamepad-2': Gamepad2,
-  gift: Gift,
   wallet: Wallet,
 };
 

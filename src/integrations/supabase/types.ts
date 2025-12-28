@@ -273,6 +273,51 @@ export type Database = {
         }
         Relationships: []
       }
+      shopping_products: {
+        Row: {
+          created_at: string
+          description_en: string | null
+          description_my: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name_en: string
+          name_my: string
+          price_mmk: number | null
+          price_thb: number
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_en?: string | null
+          description_my?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name_en: string
+          name_my: string
+          price_mmk?: number | null
+          price_thb: number
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_en?: string | null
+          description_my?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name_en?: string
+          name_my?: string
+          price_mmk?: number | null
+          price_thb?: number
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

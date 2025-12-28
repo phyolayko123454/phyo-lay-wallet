@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Settings, DollarSign, Package, ShoppingCart, Users, Check, X } from 'lucide-react';
+import { Settings, DollarSign, Package, ShoppingCart, ShoppingBag, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
+import ShoppingManagement from '@/components/admin/ShoppingManagement';
 
 const Admin: React.FC = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -86,10 +87,11 @@ const Admin: React.FC = () => {
         </h1>
 
         <Tabs defaultValue="exchange" className="space-y-6">
-          <TabsList className="bg-secondary">
+          <TabsList className="bg-secondary flex-wrap h-auto gap-1">
             <TabsTrigger value="exchange"><DollarSign className="w-4 h-4 mr-2" />{t('exchangeRate')}</TabsTrigger>
             <TabsTrigger value="deposits"><Package className="w-4 h-4 mr-2" />{t('deposits')}</TabsTrigger>
             <TabsTrigger value="orders"><ShoppingCart className="w-4 h-4 mr-2" />{t('orders')}</TabsTrigger>
+            <TabsTrigger value="shopping"><ShoppingBag className="w-4 h-4 mr-2" />{t('shopping')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="exchange">
@@ -158,6 +160,10 @@ const Admin: React.FC = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="shopping">
+            <ShoppingManagement />
           </TabsContent>
         </Tabs>
       </div>
