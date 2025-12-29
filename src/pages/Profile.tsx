@@ -45,9 +45,16 @@ const Profile: React.FC = () => {
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
         
         if (error) throw error;
+        
+        if (!data) {
+          // Profile doesn't exist, user may need to re-register
+          console.warn('Profile not found for user:', user.id);
+          setLoading(false);
+          return;
+        }
         
         setProfile(data);
         setFormData({
