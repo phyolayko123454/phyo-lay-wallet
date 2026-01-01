@@ -76,8 +76,23 @@ const Admin: React.FC = () => {
     fetchData();
   };
 
-  if (loading) return <Layout><div className="flex items-center justify-center min-h-[60vh]">{t('loading')}</div></Layout>;
-  if (!user || !isAdmin) return <Navigate to="/" replace />;
+  // Wait for both auth loading AND admin check to complete
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">{t('loading')}</div>
+      </Layout>
+    );
+  }
+  
+  // Only redirect after loading is complete
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <Layout>
