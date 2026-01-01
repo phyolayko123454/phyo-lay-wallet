@@ -73,8 +73,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (identifier: string, password: string) => {
     try {
+      // Check if identifier is an email or username
+      let email = identifier;
+      
+      // If not an email format, look up the email by username
+      if (!identifier.includes('@')) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', identifier)
+          .maybeSingle();
+        
+        if (profileError || !profileData) {
+          return { error: new Error('Username not found') };
+        }
+        
+        // Get user email from auth - we need to use the profile id to find the user
+        // Since we can't query auth.users directly, we'll store email in profiles
+        // For now, try using the username as-is (user might have registered with username@domain format)
+        // Or look up from profiles if we add email there
+        
+        // Alternative: Check if there's an email stored in profiles
+        const { data: fullProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', identifier)
+          .maybeSingle();
+          
+        if (fullProfile) {
+          // Try to get the user's email from the auth metadata
+          // Since we can't access auth.users, we need to attempt login with a workaround
+          // Best approach: store email in profiles table or use username as email prefix
+          
+          // For now, let's check common email patterns or require email
+          // Actually, Supabase doesn't support username login natively
+          // We need to either:
+          // 1. Store email in profiles and retrieve it
+          // 2. Use a custom lookup
+          
+          // Let's query the profiles to see if we added email there
+          const { data: userEmail } = await supabase
+            .rpc('get_user_email_by_username', { p_username: identifier })
+            .maybeSingle();
+            
+          if (userEmail) {
+            email = userEmail;
+          } else {
+            return { error: new Error('Please login with your email address') };
+          }
+        }
+      }
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
