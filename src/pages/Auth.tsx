@@ -15,7 +15,7 @@ const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(searchParams.get('mode') !== 'register');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '', username: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ identifier: '', password: '', username: '', confirmPassword: '' });
   
   const { signIn, signUp } = useAuth();
   const { t } = useLanguage();
@@ -28,7 +28,7 @@ const Auth: React.FC = () => {
 
     try {
       if (isLogin) {
-        const { error } = await signIn(formData.email, formData.password);
+        const { error } = await signIn(formData.identifier, formData.password);
         if (error) throw error;
         toast({ title: t('loginSuccess') });
         navigate('/');
@@ -36,7 +36,8 @@ const Auth: React.FC = () => {
         if (formData.password !== formData.confirmPassword) {
           throw new Error('Passwords do not match');
         }
-        const { error } = await signUp(formData.email, formData.password, formData.username);
+        // For registration, identifier is the email
+        const { error } = await signUp(formData.identifier, formData.password, formData.username);
         if (error) throw error;
         toast({ title: t('registerSuccess') });
         navigate('/');
@@ -90,15 +91,19 @@ const Auth: React.FC = () => {
               )}
 
               <div>
-                <Label htmlFor="email">{t('email')}</Label>
+                <Label htmlFor="identifier">{isLogin ? t('usernameOrEmail') : t('email')}</Label>
                 <div className="relative mt-1.5">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  {isLogin ? (
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  )}
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    id="identifier"
+                    type={isLogin ? 'text' : 'email'}
+                    placeholder={isLogin ? 'Username or Email' : 'Enter email'}
+                    value={formData.identifier}
+                    onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
                     className="pl-10 bg-secondary border-border"
                     required
                   />
