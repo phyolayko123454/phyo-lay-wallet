@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Download, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import html2canvas from 'html2canvas';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -39,7 +39,7 @@ const OrderReceipt: React.FC<OrderReceiptProps> = ({ open, onOpenChange, order }
     
     try {
       const canvas = await html2canvas(receiptRef.current, {
-        backgroundColor: '#1a1a2e',
+        backgroundColor: null,
         scale: 2,
       });
       
@@ -59,14 +59,16 @@ const OrderReceipt: React.FC<OrderReceiptProps> = ({ open, onOpenChange, order }
           <DialogTitle className="text-center">
             {language === 'my' ? 'ပြေစာ' : 'Receipt'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {language === 'my'
+              ? 'အော်ဒါအောင်မြင်ပြေစာကို ကြည့်ရှုရန်နှင့် သိမ်းရန်'
+              : 'View and save your successful order receipt'}
+          </DialogDescription>
         </DialogHeader>
         
-        <div 
-          ref={receiptRef} 
-          className="p-6 rounded-lg"
-          style={{ 
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-          }}
+        <div
+          ref={receiptRef}
+          className="p-6 rounded-lg bg-gradient-to-br from-background to-secondary border border-border/50"
         >
           {/* Header */}
           <div className="text-center mb-6">

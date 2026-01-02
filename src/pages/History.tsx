@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Clock, CheckCircle, XCircle, Loader2, AlertCircle, Download, FileText } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import OrderReceipt from '@/components/OrderReceipt';
 
@@ -36,6 +37,7 @@ interface Deposit {
 const History: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const { t, language } = useLanguage();
+  const { toast } = useToast();
   const navigate = useNavigate();
   
   const [orders, setOrders] = useState<Order[]>([]);
@@ -49,48 +51,113 @@ const History: React.FC = () => {
     }
   }, [user, authLoading, navigate]);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      if (!user) return;
-      
-      try {
-        const [ordersRes, depositsRes] = await Promise.all([
-          supabase
-            .from('orders')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('deposit_requests')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false }),
-        ]);
+  const fetchHistory = useCallback(async () => {
+    if (!user) return;
 
-        if (ordersRes.data) setOrders(ordersRes.data);
-        if (depositsRes.data) setDeposits(depositsRes.data);
-      } catch (error) {
-        console.error('Error fetching history:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    try {
+      const [ordersRes, depositsRes] = await Promise.all([
+        supabase
+          .from('orders')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('deposit_requests')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+      ]);
 
-    if (user) {
-      fetchHistory();
+      if (ordersRes.data) setOrders(ordersRes.data);
+      if (depositsRes.data) setDeposits(depositsRes.data);
+    } catch (error) {
+      console.error('Error fetching history:', error);
+    } finally {
+      setLoading(false);
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user) fetchHistory();
+  }, [user, fetchHistory]);
+
+  // Live updates: when admin approves an order, user sees it immediately
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`orders:user:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const next = payload.new as Order;
+
+            setOrders((prev) => {
+              const exists = prev.some((o) => o.id === next.id);
+              const merged = exists
+                ? prev.map((o) => (o.id === next.id ? { ...o, ...next } : o))
+                : [next, ...prev];
+              return merged;
+            });
+
+            if (next.status === 'approved' || next.status === 'completed') {
+              toast({
+                title: language === 'my' ? 'အော်ဒါအောင်မြင်ပါသည်' : 'Order approved',
+                description:
+                  language === 'my'
+                    ? 'History ထဲကနေ ပြေစာကို ကြည့်ပြီး သိမ်းနိုင်ပါပြီ။'
+                    : 'You can now view and save your receipt from History.',
+              });
+            }
+          }
+
+          if (payload.eventType === 'DELETE') {
+            const oldRow = payload.old as { id?: string };
+            if (oldRow?.id) setOrders((prev) => prev.filter((o) => o.id !== oldRow.id));
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, toast, language]);
+
   const getStatusBadge = (status: string) => {
+    const approvedLabel = language === 'my' ? 'အောင်မြင်' : 'Approved';
+    const rejectedLabel = language === 'my' ? 'ပယ်ချ' : 'Rejected';
+    const pendingLabel = language === 'my' ? 'စောင့်ဆိုင်းဆဲ' : 'Pending';
+
     switch (status) {
       case 'approved':
       case 'completed':
-        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle className="w-3 h-3 mr-1" /> Approved</Badge>;
+        return (
+          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+            <CheckCircle className="w-3 h-3 mr-1" /> {approvedLabel}
+          </Badge>
+        );
       case 'rejected':
-        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="w-3 h-3 mr-1" /> Rejected</Badge>;
+        return (
+          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+            <XCircle className="w-3 h-3 mr-1" /> {rejectedLabel}
+          </Badge>
+        );
       case 'pending':
       default:
-        return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30"><AlertCircle className="w-3 h-3 mr-1" /> Pending</Badge>;
+        return (
+          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+            <AlertCircle className="w-3 h-3 mr-1" /> {pendingLabel}
+          </Badge>
+        );
     }
   };
 
@@ -175,7 +242,7 @@ const History: React.FC = () => {
                               {getStatusBadge(order.status)}
                             </div>
                           </div>
-                          {order.status === 'approved' && (
+                          {(order.status === 'approved' || order.status === 'completed') && (
                             <div className="mt-3">
                               <Button
                                 variant="outline"
