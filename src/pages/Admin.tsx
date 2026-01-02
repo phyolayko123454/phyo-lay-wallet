@@ -76,6 +76,16 @@ const Admin: React.FC = () => {
     fetchData();
   };
 
+  const handleOrderAction = async (id: string, status: 'approved' | 'rejected') => {
+    await supabase
+      .from('orders')
+      .update({ status, processed_by: user?.id, processed_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    toast({ title: `Order ${status}` });
+    fetchData();
+  };
+
   // Wait for both auth loading AND admin check to complete
   if (loading) {
     return (
@@ -167,9 +177,23 @@ const Admin: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {orders.map((order) => (
-                    <div key={order.id} className="p-4 bg-secondary rounded-lg">
-                      <p className="font-medium">{order.amount} {order.currency}</p>
-                      <p className="text-sm text-muted-foreground">{order.status}</p>
+                    <div key={order.id} className="flex items-center justify-between p-4 bg-secondary rounded-lg">
+                      <div>
+                        <p className="font-medium">{order.amount} {order.currency}</p>
+                        <p className="text-sm text-muted-foreground capitalize">{order.category_type?.replace('_', ' ')}</p>
+                        <p className="text-xs text-muted-foreground">{order.phone_number || order.player_id || ''}</p>
+                        <p className="text-xs text-muted-foreground">{order.status}</p>
+                      </div>
+                      {order.status === 'pending' && (
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => handleOrderAction(order.id, 'approved')} className="bg-success">
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleOrderAction(order.id, 'rejected')}>
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
