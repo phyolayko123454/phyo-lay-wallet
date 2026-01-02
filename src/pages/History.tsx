@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Loader2, AlertCircle, Download } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Loader2, AlertCircle, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +10,7 @@ import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
+import OrderReceipt from '@/components/OrderReceipt';
 
 interface Order {
   id: string;
@@ -18,6 +19,7 @@ interface Order {
   category_type: string;
   status: string;
   created_at: string;
+  processed_at: string | null;
   phone_number: string | null;
   player_id: string | null;
 }
@@ -33,12 +35,13 @@ interface Deposit {
 
 const History: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -172,6 +175,19 @@ const History: React.FC = () => {
                               {getStatusBadge(order.status)}
                             </div>
                           </div>
+                          {order.status === 'approved' && (
+                            <div className="mt-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setReceiptOrder(order)}
+                                className="text-xs"
+                              >
+                                <FileText className="w-3 h-3 mr-1" />
+                                {language === 'my' ? 'ပြေစာကြည့်မည်' : 'View Receipt'}
+                              </Button>
+                            </div>
+                          )}
                         </motion.div>
                       ))}
                     </div>
@@ -245,6 +261,15 @@ const History: React.FC = () => {
           </Tabs>
         </motion.div>
       </div>
+
+      {/* Order Receipt Dialog */}
+      {receiptOrder && (
+        <OrderReceipt
+          open={!!receiptOrder}
+          onOpenChange={(open) => !open && setReceiptOrder(null)}
+          order={receiptOrder}
+        />
+      )}
     </Layout>
   );
 };
