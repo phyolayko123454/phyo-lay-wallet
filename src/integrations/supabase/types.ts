@@ -249,6 +249,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          email: string | null
           full_name: string | null
           id: string
           language: string | null
@@ -257,6 +258,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          email?: string | null
           full_name?: string | null
           id: string
           language?: string | null
@@ -265,6 +267,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string
           language?: string | null
@@ -368,6 +371,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_email_by_username: {
+        Args: { p_username: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
