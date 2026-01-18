@@ -18,7 +18,7 @@ const Auth: React.FC = () => {
   const [formData, setFormData] = useState({ identifier: '', password: '', username: '', confirmPassword: '' });
   
   const { signIn, signUp } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -43,7 +43,16 @@ const Auth: React.FC = () => {
         navigate('/');
       }
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      let errorMessage = error.message || 'An error occurred';
+      
+      // Handle network errors more gracefully
+      if (errorMessage === 'Failed to fetch' || errorMessage.includes('fetch')) {
+        errorMessage = language === 'my' 
+          ? 'ကွန်နက်ရှင်ပြဿနာရှိနေပါသည်။ ခဏစောင့်ပြီး ပြန်ကြိုးစားပါ။' 
+          : 'Connection error. Please wait a moment and try again.';
+      }
+      
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
