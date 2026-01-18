@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Smartphone, Gamepad2, Wallet, Phone } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Smartphone, Gamepad2, Wallet, Phone, AlertTriangle, Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,8 +8,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Category {
   id: string;
@@ -37,7 +38,7 @@ const iconMap: { [key: string]: React.ComponentType<any> } = {
 
 const TopUp: React.FC = () => {
   const { t, language } = useLanguage();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   
@@ -47,6 +48,15 @@ const TopUp: React.FC = () => {
   const [playerId, setPlayerId] = useState('');
   const [customAmount, setCustomAmount] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState<'THB' | 'MMK'>('THB');
+  const [selectedCategoryType, setSelectedCategoryType] = useState<string>('');
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      toast.error(language === 'my' ? 'အရင်ဝင်ရောက်ပါ' : 'Please login first');
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate, language]);
 
   // Fetch categories
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
@@ -139,8 +149,19 @@ const TopUp: React.FC = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success(language === 'my' ? 'အော်ဒါတင်ပြီးပါပြီ။' : 'Order submitted successfully!');
+      toast.success(
+        language === 'my' 
+          ? 'အော်ဒါတင်ပြီးပါပြီ။ Admin ခွင့်ပြုချက်စောင့်ပါ။' 
+          : 'Order submitted! Waiting for admin approval.',
+        {
+          description: language === 'my' 
+            ? 'History မှာ စစ်ဆေးနိုင်ပါသည်။' 
+            : 'Check History for status updates.',
+          duration: 5000,
+        }
+      );
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
       setOrderDialogOpen(false);
       resetOrderForm();
     },
@@ -162,8 +183,25 @@ const TopUp: React.FC = () => {
       navigate('/auth');
       return;
     }
+
+    // Check if user has balance
+    const hasBalance = wallet && (
+      (selectedCurrency === 'THB' && (wallet.balance_thb || 0) > 0) ||
+      (selectedCurrency === 'MMK' && (wallet.balance_mmk || 0) > 0)
+    );
+
+    if (!hasBalance) {
+      toast.error(
+        language === 'my' 
+          ? 'ဘောနပ်မရှိသေးပါ။ အရင်ငွေသွင်းပါ။' 
+          : 'No balance. Please deposit first.'
+      );
+      navigate('/deposit');
+      return;
+    }
     
     setSelectedProduct({ ...product, category_id: product.category_id });
+    setSelectedCategoryType(categoryType);
     setOrderDialogOpen(true);
   };
 
@@ -176,6 +214,20 @@ const TopUp: React.FC = () => {
     const amount = parseFloat(customAmount) || 0;
     if (amount <= 0) {
       toast.error(language === 'my' ? 'ပမာဏထည့်ပါ' : 'Please enter amount');
+      return;
+    }
+
+    // Check balance before submitting
+    const currentBalance = selectedCurrency === 'THB' 
+      ? (wallet?.balance_thb || 0) 
+      : (wallet?.balance_mmk || 0);
+
+    if (amount > currentBalance) {
+      toast.error(
+        language === 'my' 
+          ? `ဘောနပ်မလုံလောက်ပါ။ လက်ကျန်: ${currentBalance} ${selectedCurrency}` 
+          : `Insufficient balance. Available: ${currentBalance} ${selectedCurrency}`
+      );
       return;
     }
 
@@ -222,6 +274,28 @@ const TopUp: React.FC = () => {
     return `${thb} ฿`;
   };
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
+
+  // Don't render if not logged in (will redirect)
+  if (!user) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
+
   if (categoriesLoading || productsLoading) {
     return (
       <Layout>
@@ -231,6 +305,12 @@ const TopUp: React.FC = () => {
       </Layout>
     );
   }
+
+  const currentBalance = selectedCurrency === 'THB' 
+    ? (wallet?.balance_thb || 0) 
+    : (wallet?.balance_mmk || 0);
+  
+  const hasBalance = currentBalance > 0;
 
   return (
     <Layout>
@@ -258,16 +338,22 @@ const TopUp: React.FC = () => {
         </div>
 
         {/* Wallet Balance Display */}
-        {user && wallet && (
-          <div className="max-w-md mx-auto mb-8 p-4 card-premium gold-border-glow text-center">
-            <p className="text-sm text-muted-foreground mb-1">{t('balance')}</p>
-            <p className="text-2xl font-bold text-primary">
-              {selectedCurrency === 'THB' 
-                ? `${wallet.balance_thb || 0} ฿` 
-                : `${wallet.balance_mmk || 0} Ks`}
-            </p>
-          </div>
-        )}
+        <div className="max-w-md mx-auto mb-8 p-4 card-premium gold-border-glow text-center">
+          <p className="text-sm text-muted-foreground mb-1">{t('balance')}</p>
+          <p className="text-2xl font-bold text-primary">
+            {currentBalance.toLocaleString()} {selectedCurrency === 'THB' ? '฿' : 'Ks'}
+          </p>
+          {!hasBalance && (
+            <Alert className="mt-3 border-yellow-500/30 bg-yellow-500/10">
+              <AlertTriangle className="h-4 w-4 text-yellow-500" />
+              <AlertDescription className="text-yellow-400 text-sm">
+                {language === 'my' 
+                  ? 'ဘောနပ်မရှိသေးပါ။ Order တင်ရန် အရင်ငွေသွင်းပါ။' 
+                  : 'No balance. Please deposit first to place orders.'}
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => {
