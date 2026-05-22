@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "sans-serif"],
-        serif: ["Playfair Display", "serif"],
+        sans: ["Plus Jakarta Sans", "Noto Sans Myanmar", "sans-serif"],
+        display: ["Sora", "Noto Sans Myanmar", "sans-serif"],
+        serif: ["Sora", "Noto Sans Myanmar", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -64,6 +65,11 @@ export default {
           light: "hsl(var(--gold-light))",
           dark: "hsl(var(--gold-dark))",
           muted: "hsl(var(--gold-muted))",
+        },
+        neon: {
+          DEFAULT: "hsl(var(--neon))",
+          cyan: "hsl(var(--neon-cyan))",
+          purple: "hsl(var(--neon-purple))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
