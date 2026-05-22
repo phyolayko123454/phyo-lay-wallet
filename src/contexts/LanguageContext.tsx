@@ -72,6 +72,7 @@ const translations: Translations = {
   
   // Auth
   username: { en: 'Username', my: 'အသုံးပြုသူအမည်' },
+  usernameOrEmail: { en: 'Username or Email', my: 'အသုံးပြုသူ သို့မဟုတ် အီးမေးလ်' },
   password: { en: 'Password', my: 'စကားဝှက်' },
   confirmPassword: { en: 'Confirm Password', my: 'စကားဝှက်အတည်ပြုရန်' },
   email: { en: 'Email', my: 'အီးမေးလ်' },
