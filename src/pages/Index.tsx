@@ -21,8 +21,8 @@ const categories = [
 ];
 
 const games = [
-  { name: 'Mobile Legend', tag: 'Diamonds', cat: 'mobile', logo: mlbbLogo },
-  { name: 'PUBG Mobile', tag: 'UC', cat: 'mobile', logo: pubgLogo },
+  { key: 'mlbb', name: 'Mobile Legend', tag: 'Diamonds', cat: 'mobile', logo: mlbbLogo },
+  { key: 'pubg', name: 'PUBG Mobile', tag: 'UC', cat: 'mobile', logo: pubgLogo },
 ];
 
 const Index: React.FC = () => {
