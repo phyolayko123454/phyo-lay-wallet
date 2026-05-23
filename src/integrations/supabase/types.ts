@@ -110,6 +110,54 @@ export type Database = {
         }
         Relationships: []
       }
+      game_packages: {
+        Row: {
+          bonus_amount: number | null
+          created_at: string | null
+          game_key: string
+          id: string
+          image_url: string | null
+          in_game_amount: number
+          is_active: boolean | null
+          name_en: string
+          name_my: string
+          price_mmk: number
+          price_thb: number
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          bonus_amount?: number | null
+          created_at?: string | null
+          game_key: string
+          id?: string
+          image_url?: string | null
+          in_game_amount: number
+          is_active?: boolean | null
+          name_en: string
+          name_my: string
+          price_mmk: number
+          price_thb?: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          bonus_amount?: number | null
+          created_at?: string | null
+          game_key?: string
+          id?: string
+          image_url?: string | null
+          in_game_amount?: number
+          is_active?: boolean | null
+          name_en?: string
+          name_my?: string
+          price_mmk?: number
+          price_thb?: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -147,12 +195,16 @@ export type Database = {
           category_type: string
           created_at: string | null
           currency: string
+          game_key: string | null
           id: string
+          in_game_amount: number | null
+          package_id: string | null
           phone_number: string | null
           player_id: string | null
           processed_at: string | null
           processed_by: string | null
           product_id: string | null
+          server_id: string | null
           status: string | null
           user_id: string
         }
@@ -162,12 +214,16 @@ export type Database = {
           category_type: string
           created_at?: string | null
           currency: string
+          game_key?: string | null
           id?: string
+          in_game_amount?: number | null
+          package_id?: string | null
           phone_number?: string | null
           player_id?: string | null
           processed_at?: string | null
           processed_by?: string | null
           product_id?: string | null
+          server_id?: string | null
           status?: string | null
           user_id: string
         }
@@ -177,12 +233,16 @@ export type Database = {
           category_type?: string
           created_at?: string | null
           currency?: string
+          game_key?: string | null
           id?: string
+          in_game_amount?: number | null
+          package_id?: string | null
           phone_number?: string | null
           player_id?: string | null
           processed_at?: string | null
           processed_by?: string | null
           product_id?: string | null
+          server_id?: string | null
           status?: string | null
           user_id?: string
         }
@@ -491,6 +551,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_order: {
+        Args: { p_note?: string; p_order_id: string }
+        Returns: {
+          admin_note: string | null
+          amount: number
+          category_type: string
+          created_at: string | null
+          currency: string
+          game_key: string | null
+          id: string
+          in_game_amount: number | null
+          package_id: string | null
+          phone_number: string | null
+          player_id: string | null
+          processed_at: string | null
+          processed_by: string | null
+          product_id: string | null
+          server_id: string | null
+          status: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_user_email_by_username: {
         Args: { p_username: string }
         Returns: string
@@ -501,6 +589,34 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      reject_order: {
+        Args: { p_note?: string; p_order_id: string }
+        Returns: {
+          admin_note: string | null
+          amount: number
+          category_type: string
+          created_at: string | null
+          currency: string
+          game_key: string | null
+          id: string
+          in_game_amount: number | null
+          package_id: string | null
+          phone_number: string | null
+          player_id: string | null
+          processed_at: string | null
+          processed_by: string | null
+          product_id: string | null
+          server_id: string | null
+          status: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
