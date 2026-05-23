@@ -199,7 +199,7 @@ const Index: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => navigate('/topup')}
+                onClick={() => navigate(`/topup/${g.key}`)}
                 className="glass rounded-2xl p-3 flex items-center gap-3 border border-primary/30 hover:border-primary/60 transition"
               >
                 <img
