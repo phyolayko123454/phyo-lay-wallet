@@ -83,7 +83,8 @@ const Admin: React.FC = () => {
         const col = currency === 'MMK' ? 'balance_mmk' : 'balance_thb';
         const { data: w } = await supabase.from('wallets').select(col).eq('user_id', userId).maybeSingle();
         const current = Number((w as any)?.[col] ?? 0);
-        const { error: e1 } = await supabase.from('wallets').update({ [col]: current + Number(amount) }).eq('user_id', userId);
+        const patch: any = { [col]: current + Number(amount) };
+        const { error: e1 } = await supabase.from('wallets').update(patch).eq('user_id', userId);
         if (e1) throw e1;
       }
       const { error } = await supabase.from('deposit_requests')
