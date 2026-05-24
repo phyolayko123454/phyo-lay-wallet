@@ -142,7 +142,7 @@ const Admin: React.FC = () => {
 
   if (loading) return <Layout><div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div></Layout>;
   if (!user) return <Navigate to="/auth" replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  // NOTE: role gating temporarily disabled — any logged-in user can access admin
 
   const pendingOrders = (ordersQ.data ?? []).filter((o: any) => o.status === 'pending');
   const pendingDeposits = (depositsQ.data ?? []).filter((d: any) => d.status === 'pending');
