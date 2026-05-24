@@ -70,7 +70,7 @@ const Header: React.FC = () => {
 
             {user ? (
               <>
-                {isAdmin && (
+                {user && (
                   <Button variant="ghost" asChild className="text-primary">
                     <Link to="/admin">
                       <Shield className="w-4 h-4 mr-2" />
@@ -152,7 +152,7 @@ const Header: React.FC = () => {
               <div className="border-t border-border my-2 pt-2">
                 {user ? (
                   <>
-                    {isAdmin && (
+                    {user && (
                       <Link
                         to="/admin"
                         onClick={() => setIsOpen(false)}
