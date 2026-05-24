@@ -33,16 +33,12 @@ const WalletPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <Button asChild className="gold-gradient text-primary-foreground">
                 <Link to="/deposit">
                   <Plus className="w-4 h-4 mr-2" />
                   {t('deposit')}
                 </Link>
-              </Button>
-              <Button variant="outline" className="border-primary/50">
-                <ArrowUpRight className="w-4 h-4 mr-2" />
-                {t('withdraw')}
               </Button>
             </div>
           </div>
