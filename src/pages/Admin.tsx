@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
   DollarSign, Package, ShoppingCart, ShoppingBag, Check, X, ArrowLeft,
-  Gamepad2, Plus, Trash2, Loader2, Image as ImageIcon, Users, Clock,
+  Gamepad2, Plus, Trash2, Loader2, Image as ImageIcon, Users, Clock, Landmark,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
