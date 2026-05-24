@@ -86,56 +86,51 @@ const Index: React.FC = () => {
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="relative rounded-2xl glass-strong p-4 border border-primary/30"
         >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3 flex-1">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-9 h-6 rounded-sm overflow-hidden border border-white/20 flex flex-col">
-                  <div className="flex-1 bg-yellow-400" />
-                  <div className="flex-1 bg-green-600" />
-                  <div className="flex-1 bg-red-600" />
-                </div>
-                <ArrowLeftRight className="w-3.5 h-3.5 text-primary" />
+          <div className="flex items-start gap-3">
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-9 h-6 rounded-sm overflow-hidden border border-white/20 flex flex-col">
+                <div className="flex-1 bg-yellow-400" />
+                <div className="flex-1 bg-green-600" />
+                <div className="flex-1 bg-red-600" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-foreground/90">သင့်ပိုက်ဆံအိတ်</span>
-                  <button onClick={() => setShowBalance((v) => !v)} className="text-muted-foreground">
-                    {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                </div>
-                <p className="font-display text-2xl font-extrabold mt-1">
-                  {showBalance ? mmk.toLocaleString() : '••••'}
-                  <span className="text-sm font-semibold text-muted-foreground ml-1">ks</span>
-                </p>
-              </div>
+              <ArrowLeftRight className="w-3.5 h-3.5 text-primary" />
             </div>
-            <button
-              onClick={() => navigate('/deposit')}
-              className="flex flex-col items-center gap-1"
-              aria-label="Deposit"
-            >
-              <div className="w-14 h-14 rounded-full neon-gradient neon-glow flex items-center justify-center">
-                <WalletIcon className="w-6 h-6 text-primary-foreground" />
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-foreground/90">သင့်ပိုက်ဆံအိတ်</span>
+                <button onClick={() => setShowBalance((v) => !v)} className="text-muted-foreground">
+                  {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                </button>
               </div>
-              <span className="text-[11px] text-foreground/80">ငွေဖြည့်ရန်</span>
-            </button>
+              <p className="font-display text-2xl font-extrabold mt-1">
+                {showBalance ? mmk.toLocaleString() : '••••'}
+                <span className="text-sm font-semibold text-muted-foreground ml-1">ks</span>
+              </p>
+            </div>
           </div>
 
-          {/* Two history buttons inside the same card */}
-          <div className="mt-4 grid grid-cols-2 gap-2 pt-3 border-t border-primary/20">
+          {/* Action buttons */}
+          <div className="mt-4 grid grid-cols-3 gap-2 pt-3 border-t border-primary/20">
+            <button
+              onClick={() => navigate('/deposit')}
+              className="flex items-center justify-center gap-1.5 h-11 rounded-xl neon-gradient text-primary-foreground text-sm font-semibold"
+            >
+              <WalletIcon className="w-4 h-4" />
+              ငွေဖြည့်
+            </button>
             <button
               onClick={() => navigate('/history')}
-              className="flex items-center justify-center gap-2 h-11 rounded-xl bg-secondary/60 text-sm font-medium"
+              className="flex items-center justify-center gap-1.5 h-11 rounded-xl bg-secondary/60 text-sm font-medium"
             >
               <HistoryIcon className="w-4 h-4 text-primary" />
-              အော်ဒါမှတ်တမ်း
+              အော်ဒါ
             </button>
             <button
               onClick={() => navigate('/wallet')}
-              className="flex items-center justify-center gap-2 h-11 rounded-xl bg-secondary/60 text-sm font-medium"
+              className="flex items-center justify-center gap-1.5 h-11 rounded-xl bg-secondary/60 text-xs font-medium"
             >
               <Receipt className="w-4 h-4 text-primary" />
-              ငွေဖြည့် မှတ်တမ်း
+              မှတ်တမ်း
             </button>
           </div>
         </motion.div>
