@@ -32,7 +32,7 @@ const Admin: React.FC = () => {
       if (data) setExchangeRate(String(data.thb_to_mmk));
       return data;
     },
-    enabled: isAdmin,
+    enabled: !!user,
   });
 
   const depositsQ = useQuery({
@@ -41,7 +41,7 @@ const Admin: React.FC = () => {
       const { data } = await supabase.from('deposit_requests').select('*').order('created_at', { ascending: false });
       return data ?? [];
     },
-    enabled: isAdmin,
+    enabled: !!user,
   });
 
   const ordersQ = useQuery({
@@ -50,7 +50,7 @@ const Admin: React.FC = () => {
       const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
       return data ?? [];
     },
-    enabled: isAdmin,
+    enabled: !!user,
     refetchInterval: 5000,
   });
 
@@ -60,7 +60,7 @@ const Admin: React.FC = () => {
       const { data } = await supabase.from('game_packages').select('*').order('game_key').order('sort_order');
       return data ?? [];
     },
-    enabled: isAdmin,
+    enabled: !!user,
   });
 
   // ---- Mutations ----
