@@ -439,4 +439,40 @@ const PackageEditor: React.FC<{ onSave: (p: any) => void; saving: boolean }> = (
   );
 };
 
+const PaymentMethodEditor: React.FC<{ onSave: (p: any) => void; saving: boolean }> = ({ onSave, saving }) => {
+  const [form, setForm] = useState({
+    name: '', type: 'bank', country: 'MM', account_info: '', qr_code_url: '', is_active: true,
+  });
+  return (
+    <details className="glass rounded-2xl border border-primary/15">
+      <summary className="p-4 cursor-pointer font-semibold flex items-center gap-2">
+        <Plus className="w-4 h-4 text-primary" /> Add Bank / Wallet Account
+      </summary>
+      <div className="p-4 pt-0 grid grid-cols-2 gap-2">
+        <Input placeholder="Name (KBZ Bank)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-secondary/50 col-span-2" />
+        <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
+                className="h-10 rounded-lg bg-secondary/50 px-3 text-sm border border-border">
+          <option value="bank">Bank</option>
+          <option value="kbz_pay">KBZ Pay</option>
+          <option value="wave_pay">Wave Pay</option>
+          <option value="promptpay">PromptPay</option>
+          <option value="aya_pay">AYA Pay</option>
+        </select>
+        <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
+                className="h-10 rounded-lg bg-secondary/50 px-3 text-sm border border-border">
+          <option value="MM">Myanmar</option>
+          <option value="TH">Thailand</option>
+        </select>
+        <Input placeholder="Account number / Phone" value={form.account_info} onChange={(e) => setForm({ ...form, account_info: e.target.value })} className="bg-secondary/50 col-span-2" />
+        <Input placeholder="QR code image URL (optional)" value={form.qr_code_url} onChange={(e) => setForm({ ...form, qr_code_url: e.target.value })} className="bg-secondary/50 col-span-2" />
+        <Button disabled={saving || !form.name} onClick={() => { onSave(form); setForm({ ...form, name: '', account_info: '', qr_code_url: '' }); }}
+                className="col-span-2 neon-gradient text-primary-foreground h-11 rounded-xl">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+        </Button>
+      </div>
+    </details>
+  );
+};
+
+
 export default Admin;
