@@ -140,6 +140,42 @@ const Admin: React.FC = () => {
     onSuccess: () => { toast({ title: 'Deleted' }); qc.invalidateQueries({ queryKey: ['admin_packages'] }); },
   });
 
+  const paymentsQ = useQuery({
+    queryKey: ['admin_payments'],
+    queryFn: async () => {
+      const { data } = await supabase.from('payment_methods').select('*').order('created_at', { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!user,
+  });
+
+  const savePayment = useMutation({
+    mutationFn: async (p: any) => {
+      const payload = {
+        name: p.name, type: p.type, country: p.country,
+        account_info: p.account_info || null, qr_code_url: p.qr_code_url || null,
+        is_active: p.is_active !== false,
+      };
+      if (p.id) {
+        const { error } = await supabase.from('payment_methods').update(payload).eq('id', p.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('payment_methods').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { toast({ title: 'Payment method saved' }); qc.invalidateQueries({ queryKey: ['admin_payments'] }); },
+    onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
+  });
+
+  const deletePayment = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('payment_methods').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast({ title: 'Deleted' }); qc.invalidateQueries({ queryKey: ['admin_payments'] }); },
+  });
+
   if (loading) return <Layout><div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div></Layout>;
   if (!user) return <Navigate to="/auth" replace />;
   // NOTE: role gating temporarily disabled — any logged-in user can access admin
