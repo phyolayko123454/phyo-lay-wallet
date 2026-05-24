@@ -353,6 +353,33 @@ const Admin: React.FC = () => {
               <ShoppingManagement />
             </div>
           </TabsContent>
+
+          {/* PAYMENT METHODS (Bank accounts / wallets) */}
+          <TabsContent value="payments" className="space-y-3">
+            <PaymentMethodEditor onSave={(p) => savePayment.mutate(p)} saving={savePayment.isPending} />
+            {(paymentsQ.data ?? []).length === 0 && <Empty label="No payment methods yet" />}
+            {(paymentsQ.data ?? []).map((m: any) => (
+              <div key={m.id} className="glass rounded-2xl p-4 border border-primary/10">
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-xl neon-gradient flex items-center justify-center text-primary-foreground shrink-0">
+                    <Landmark className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-display font-bold">{m.name}</p>
+                      <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">{m.country}</Badge>
+                      <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">{m.type}</Badge>
+                      {!m.is_active && <Badge variant="outline" className="text-muted-foreground text-[10px]">inactive</Badge>}
+                    </div>
+                    {m.account_info && <p className="font-mono text-sm mt-1 break-all">{m.account_info}</p>}
+                  </div>
+                  <Button size="icon" variant="ghost" onClick={() => { if (confirm('Delete?')) deletePayment.mutate(m.id); }}>
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>
