@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
-  DollarSign, Package, ShoppingCart, ShoppingBag, Check, X, ArrowLeft,
+  Package, ShoppingCart, Check, X, ArrowLeft,
   Gamepad2, Plus, Trash2, Loader2, Image as ImageIcon, Users, Clock, Landmark,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,28 +13,16 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
-import ShoppingManagement from '@/components/admin/ShoppingManagement';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+
 const Admin: React.FC = () => {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [exchangeRate, setExchangeRate] = useState('95.50');
 
   // ---- Queries ----
-  const ratesQ = useQuery({
-    queryKey: ['admin_rate'],
-    queryFn: async () => {
-      const { data } = await supabase.from('exchange_rates').select('*').eq('is_active', true)
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
-      if (data) setExchangeRate(String(data.thb_to_mmk));
-      return data;
-    },
-    enabled: !!user,
-  });
-
   const depositsQ = useQuery({
     queryKey: ['admin_deposits'],
     queryFn: async () => {
@@ -63,18 +51,6 @@ const Admin: React.FC = () => {
     enabled: !!user,
   });
 
-  // ---- Mutations ----
-  const saveRate = useMutation({
-    mutationFn: async () => {
-      await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
-      const { error } = await supabase.from('exchange_rates').insert({
-        thb_to_mmk: parseFloat(exchangeRate),
-        set_by: user?.id, is_active: true,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => { toast({ title: 'လဲနှုန်း Save ပြီးပါပြီ' }); qc.invalidateQueries({ queryKey: ['admin_rate'] }); },
-  });
 
   const depositAction = useMutation({
     mutationFn: async ({ id, status, amount, currency, userId }: any) => {
@@ -139,6 +115,15 @@ const Admin: React.FC = () => {
     },
     onSuccess: () => { toast({ title: 'Deleted' }); qc.invalidateQueries({ queryKey: ['admin_packages'] }); },
   });
+
+  const deleteAllPackages = useMutation({
+    mutationFn: async (gameKey: string) => {
+      const { error } = await supabase.from('game_packages').delete().eq('game_key', gameKey);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast({ title: 'All demo packages deleted' }); qc.invalidateQueries({ queryKey: ['admin_packages'] }); },
+  });
+
 
   const paymentsQ = useQuery({
     queryKey: ['admin_payments'],
@@ -215,16 +200,11 @@ const Admin: React.FC = () => {
             <TabsTrigger value="packages" className="data-[state=active]:neon-gradient data-[state=active]:text-primary-foreground rounded-xl">
               <Gamepad2 className="w-4 h-4 mr-1.5" /> Packages
             </TabsTrigger>
-            <TabsTrigger value="exchange" className="data-[state=active]:neon-gradient data-[state=active]:text-primary-foreground rounded-xl">
-              <DollarSign className="w-4 h-4 mr-1.5" /> Rate
-            </TabsTrigger>
-            <TabsTrigger value="shopping" className="data-[state=active]:neon-gradient data-[state=active]:text-primary-foreground rounded-xl">
-              <ShoppingBag className="w-4 h-4 mr-1.5" /> Shop
-            </TabsTrigger>
             <TabsTrigger value="payments" className="data-[state=active]:neon-gradient data-[state=active]:text-primary-foreground rounded-xl">
               <Landmark className="w-4 h-4 mr-1.5" /> Bank
             </TabsTrigger>
           </TabsList>
+
 
           {/* ORDERS */}
           <TabsContent value="orders" className="space-y-3">
@@ -315,7 +295,15 @@ const Admin: React.FC = () => {
             <PackageEditor onSave={(p) => upsertPackage.mutate(p)} saving={upsertPackage.isPending} />
             {['pubg', 'mlbb'].map((gk) => (
               <div key={gk} className="space-y-2">
-                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">{gk}</p>
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{gk}</p>
+                  {(packagesQ.data ?? []).filter((p: any) => p.game_key === gk).length > 0 && (
+                    <Button size="sm" variant="ghost" className="text-destructive h-7 text-xs"
+                      onClick={() => { if (confirm(`Delete ALL ${gk.toUpperCase()} packages?`)) deleteAllPackages.mutate(gk); }}>
+                      <Trash2 className="w-3 h-3 mr-1" /> Delete all demo
+                    </Button>
+                  )}
+                </div>
                 {(packagesQ.data ?? []).filter((p: any) => p.game_key === gk).map((p: any) => (
                   <div key={p.id} className="glass rounded-2xl p-3 flex items-center gap-3 border border-primary/10">
                     <div className="w-12 h-12 rounded-xl neon-gradient flex items-center justify-center text-primary-foreground font-bold text-xs">
@@ -332,27 +320,11 @@ const Admin: React.FC = () => {
                 ))}
               </div>
             ))}
+
           </TabsContent>
 
-          {/* EXCHANGE */}
-          <TabsContent value="exchange">
-            <div className="glass rounded-2xl p-5 max-w-md">
-              <h2 className="font-display font-bold mb-3">THB → MMK Exchange Rate</h2>
-              <Label className="text-xs">1 THB = ? MMK</Label>
-              <Input type="number" value={exchangeRate} onChange={(e) => setExchangeRate(e.target.value)} className="bg-secondary/50 mt-1 mb-3 h-11" />
-              <Button onClick={() => saveRate.mutate()} disabled={saveRate.isPending}
-                      className="neon-gradient text-primary-foreground w-full h-11 rounded-xl">
-                {saveRate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Rate'}
-              </Button>
-            </div>
-          </TabsContent>
+          {/* Rate & Shopping tabs removed per request */}
 
-          {/* SHOPPING */}
-          <TabsContent value="shopping">
-            <div className="glass rounded-2xl p-4">
-              <ShoppingManagement />
-            </div>
-          </TabsContent>
 
           {/* PAYMENT METHODS (Bank accounts / wallets) */}
           <TabsContent value="payments" className="space-y-3">
@@ -440,32 +412,95 @@ const PackageEditor: React.FC<{ onSave: (p: any) => void; saving: boolean }> = (
 };
 
 const PaymentMethodEditor: React.FC<{ onSave: (p: any) => void; saving: boolean }> = ({ onSave, saving }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [form, setForm] = useState({
-    name: '', type: 'bank', country: 'MM', account_info: '', qr_code_url: '', is_active: true,
+    name: '', type: 'bank_mm', country: 'MM', account_info: '', qr_code_url: '', is_active: true,
   });
+  const [uploading, setUploading] = useState(false);
+
+  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `${user.id}/qr-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('receipts').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('receipts').getPublicUrl(path);
+      setForm((f) => ({ ...f, qr_code_url: data.publicUrl }));
+      toast({ title: 'QR uploaded' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <details className="glass rounded-2xl border border-primary/15">
       <summary className="p-4 cursor-pointer font-semibold flex items-center gap-2">
         <Plus className="w-4 h-4 text-primary" /> Add Bank / Wallet Account
       </summary>
       <div className="p-4 pt-0 grid grid-cols-2 gap-2">
-        <Input placeholder="Name (KBZ Bank)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-secondary/50 col-span-2" />
+        <Input placeholder="Account holder name (e.g. U Aung)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-secondary/50 col-span-2" />
+        <select value={form.country} onChange={(e) => {
+          const country = e.target.value;
+          const defType = country === 'TH' ? 'scb' : 'bank_mm';
+          setForm({ ...form, country, type: defType });
+        }} className="h-10 rounded-lg bg-secondary/50 px-3 text-sm border border-border">
+          <option value="MM">🇲🇲 Myanmar</option>
+          <option value="TH">🇹🇭 Thailand</option>
+        </select>
         <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
                 className="h-10 rounded-lg bg-secondary/50 px-3 text-sm border border-border">
-          <option value="bank">Bank</option>
-          <option value="kbz_pay">KBZ Pay</option>
-          <option value="wave_pay">Wave Pay</option>
-          <option value="promptpay">PromptPay</option>
-          <option value="aya_pay">AYA Pay</option>
+          {form.country === 'MM' ? (
+            <>
+              <option value="kbz_bank">KBZ Bank</option>
+              <option value="aya_bank">AYA Bank</option>
+              <option value="cb_bank">CB Bank</option>
+              <option value="uab_bank">UAB Bank</option>
+              <option value="yoma_bank">Yoma Bank</option>
+              <option value="kbz_pay">KBZ Pay</option>
+              <option value="wave_pay">Wave Pay</option>
+              <option value="aya_pay">AYA Pay</option>
+              <option value="bank_mm">Other Bank</option>
+            </>
+          ) : (
+            <>
+              <option value="scb">SCB (Siam Commercial)</option>
+              <option value="kbank">Kasikorn Bank</option>
+              <option value="bbl">Bangkok Bank</option>
+              <option value="ktb">Krungthai Bank</option>
+              <option value="bay">Krungsri (BAY)</option>
+              <option value="tmb">TMB / TTB</option>
+              <option value="gsb">Government Savings</option>
+              <option value="promptpay">PromptPay</option>
+              <option value="truemoney">TrueMoney Wallet</option>
+              <option value="bank_th">Other Thai Bank</option>
+            </>
+          )}
         </select>
-        <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
-                className="h-10 rounded-lg bg-secondary/50 px-3 text-sm border border-border">
-          <option value="MM">Myanmar</option>
-          <option value="TH">Thailand</option>
-        </select>
-        <Input placeholder="Account number / Phone" value={form.account_info} onChange={(e) => setForm({ ...form, account_info: e.target.value })} className="bg-secondary/50 col-span-2" />
-        <Input placeholder="QR code image URL (optional)" value={form.qr_code_url} onChange={(e) => setForm({ ...form, qr_code_url: e.target.value })} className="bg-secondary/50 col-span-2" />
-        <Button disabled={saving || !form.name} onClick={() => { onSave(form); setForm({ ...form, name: '', account_info: '', qr_code_url: '' }); }}
+        <Input placeholder={form.country === 'TH' ? 'Account / PromptPay number' : 'Account number / Phone'} value={form.account_info} onChange={(e) => setForm({ ...form, account_info: e.target.value })} className="bg-secondary/50 col-span-2" />
+
+        <div className="col-span-2 space-y-2">
+          <Label className="text-xs text-muted-foreground">QR code image (upload)</Label>
+          <div className="flex items-center gap-3">
+            {form.qr_code_url && (
+              <img src={form.qr_code_url} alt="QR preview" className="w-16 h-16 rounded-lg object-cover border border-primary/20" />
+            )}
+            <label className="flex-1 cursor-pointer">
+              <input type="file" accept="image/*" onChange={handleQrUpload} className="hidden" />
+              <div className="h-11 rounded-xl bg-secondary/50 border border-dashed border-primary/30 flex items-center justify-center gap-2 text-sm">
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4 text-primary" />}
+                <span>{uploading ? 'Uploading…' : form.qr_code_url ? 'Replace QR image' : 'Upload QR image'}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <Button disabled={saving || !form.name || uploading} onClick={() => { onSave(form); setForm({ ...form, name: '', account_info: '', qr_code_url: '' }); }}
                 className="col-span-2 neon-gradient text-primary-foreground h-11 rounded-xl">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
         </Button>
@@ -473,6 +508,7 @@ const PaymentMethodEditor: React.FC<{ onSave: (p: any) => void; saving: boolean 
     </details>
   );
 };
+
 
 
 export default Admin;
