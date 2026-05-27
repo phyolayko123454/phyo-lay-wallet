@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
-  DollarSign, Package, ShoppingCart, ShoppingBag, Check, X, ArrowLeft,
+  Package, ShoppingCart, Check, X, ArrowLeft,
   Gamepad2, Plus, Trash2, Loader2, Image as ImageIcon, Users, Clock, Landmark,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,8 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
-import ShoppingManagement from '@/components/admin/ShoppingManagement';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
 
 const Admin: React.FC = () => {
   const { user, isAdmin, loading } = useAuth();
