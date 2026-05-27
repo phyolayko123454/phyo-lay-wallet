@@ -329,25 +329,8 @@ const Admin: React.FC = () => {
             ))}
           </TabsContent>
 
-          {/* EXCHANGE */}
-          <TabsContent value="exchange">
-            <div className="glass rounded-2xl p-5 max-w-md">
-              <h2 className="font-display font-bold mb-3">THB → MMK Exchange Rate</h2>
-              <Label className="text-xs">1 THB = ? MMK</Label>
-              <Input type="number" value={exchangeRate} onChange={(e) => setExchangeRate(e.target.value)} className="bg-secondary/50 mt-1 mb-3 h-11" />
-              <Button onClick={() => saveRate.mutate()} disabled={saveRate.isPending}
-                      className="neon-gradient text-primary-foreground w-full h-11 rounded-xl">
-                {saveRate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Rate'}
-              </Button>
-            </div>
-          </TabsContent>
+          {/* Rate & Shopping tabs removed per request */}
 
-          {/* SHOPPING */}
-          <TabsContent value="shopping">
-            <div className="glass rounded-2xl p-4">
-              <ShoppingManagement />
-            </div>
-          </TabsContent>
 
           {/* PAYMENT METHODS (Bank accounts / wallets) */}
           <TabsContent value="payments" className="space-y-3">
