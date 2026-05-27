@@ -426,7 +426,7 @@ const PaymentMethodEditor: React.FC<{ onSave: (p: any) => void; saving: boolean 
     try {
       const ext = file.name.split('.').pop() || 'png';
       const path = `${user.id}/qr-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('receipts').upload(path, file, { upsert: true });
+      const { error } = await supabase.storage.from('receipts').upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
       const { data } = supabase.storage.from('receipts').getPublicUrl(path);
       setForm((f) => ({ ...f, qr_code_url: data.publicUrl }));
