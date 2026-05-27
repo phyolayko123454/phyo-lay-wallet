@@ -140,6 +140,15 @@ const Admin: React.FC = () => {
     onSuccess: () => { toast({ title: 'Deleted' }); qc.invalidateQueries({ queryKey: ['admin_packages'] }); },
   });
 
+  const deleteAllPackages = useMutation({
+    mutationFn: async (gameKey: string) => {
+      const { error } = await supabase.from('game_packages').delete().eq('game_key', gameKey);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast({ title: 'All demo packages deleted' }); qc.invalidateQueries({ queryKey: ['admin_packages'] }); },
+  });
+
+
   const paymentsQ = useQuery({
     queryKey: ['admin_payments'],
     queryFn: async () => {
