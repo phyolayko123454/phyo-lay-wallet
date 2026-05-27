@@ -319,7 +319,15 @@ const Admin: React.FC = () => {
             <PackageEditor onSave={(p) => upsertPackage.mutate(p)} saving={upsertPackage.isPending} />
             {['pubg', 'mlbb'].map((gk) => (
               <div key={gk} className="space-y-2">
-                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">{gk}</p>
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{gk}</p>
+                  {(packagesQ.data ?? []).filter((p: any) => p.game_key === gk).length > 0 && (
+                    <Button size="sm" variant="ghost" className="text-destructive h-7 text-xs"
+                      onClick={() => { if (confirm(`Delete ALL ${gk.toUpperCase()} packages?`)) deleteAllPackages.mutate(gk); }}>
+                      <Trash2 className="w-3 h-3 mr-1" /> Delete all demo
+                    </Button>
+                  )}
+                </div>
                 {(packagesQ.data ?? []).filter((p: any) => p.game_key === gk).map((p: any) => (
                   <div key={p.id} className="glass rounded-2xl p-3 flex items-center gap-3 border border-primary/10">
                     <div className="w-12 h-12 rounded-xl neon-gradient flex items-center justify-center text-primary-foreground font-bold text-xs">
@@ -336,6 +344,7 @@ const Admin: React.FC = () => {
                 ))}
               </div>
             ))}
+
           </TabsContent>
 
           {/* Rate & Shopping tabs removed per request */}
