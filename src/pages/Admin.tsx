@@ -17,24 +17,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 
 const Admin: React.FC = () => {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [exchangeRate, setExchangeRate] = useState('95.50');
 
   // ---- Queries ----
-  const ratesQ = useQuery({
-    queryKey: ['admin_rate'],
-    queryFn: async () => {
-      const { data } = await supabase.from('exchange_rates').select('*').eq('is_active', true)
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
-      if (data) setExchangeRate(String(data.thb_to_mmk));
-      return data;
-    },
-    enabled: !!user,
-  });
-
   const depositsQ = useQuery({
     queryKey: ['admin_deposits'],
     queryFn: async () => {
@@ -63,18 +51,6 @@ const Admin: React.FC = () => {
     enabled: !!user,
   });
 
-  // ---- Mutations ----
-  const saveRate = useMutation({
-    mutationFn: async () => {
-      await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
-      const { error } = await supabase.from('exchange_rates').insert({
-        thb_to_mmk: parseFloat(exchangeRate),
-        set_by: user?.id, is_active: true,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => { toast({ title: 'လဲနှုန်း Save ပြီးပါပြီ' }); qc.invalidateQueries({ queryKey: ['admin_rate'] }); },
-  });
 
   const depositAction = useMutation({
     mutationFn: async ({ id, status, amount, currency, userId }: any) => {
