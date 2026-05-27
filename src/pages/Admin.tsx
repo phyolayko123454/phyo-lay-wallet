@@ -436,32 +436,95 @@ const PackageEditor: React.FC<{ onSave: (p: any) => void; saving: boolean }> = (
 };
 
 const PaymentMethodEditor: React.FC<{ onSave: (p: any) => void; saving: boolean }> = ({ onSave, saving }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [form, setForm] = useState({
-    name: '', type: 'bank', country: 'MM', account_info: '', qr_code_url: '', is_active: true,
+    name: '', type: 'bank_mm', country: 'MM', account_info: '', qr_code_url: '', is_active: true,
   });
+  const [uploading, setUploading] = useState(false);
+
+  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `${user.id}/qr-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('receipts').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('receipts').getPublicUrl(path);
+      setForm((f) => ({ ...f, qr_code_url: data.publicUrl }));
+      toast({ title: 'QR uploaded' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <details className="glass rounded-2xl border border-primary/15">
       <summary className="p-4 cursor-pointer font-semibold flex items-center gap-2">
         <Plus className="w-4 h-4 text-primary" /> Add Bank / Wallet Account
       </summary>
       <div className="p-4 pt-0 grid grid-cols-2 gap-2">
-        <Input placeholder="Name (KBZ Bank)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-secondary/50 col-span-2" />
+        <Input placeholder="Account holder name (e.g. U Aung)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-secondary/50 col-span-2" />
+        <select value={form.country} onChange={(e) => {
+          const country = e.target.value;
+          const defType = country === 'TH' ? 'scb' : 'bank_mm';
+          setForm({ ...form, country, type: defType });
+        }} className="h-10 rounded-lg bg-secondary/50 px-3 text-sm border border-border">
+          <option value="MM">🇲🇲 Myanmar</option>
+          <option value="TH">🇹🇭 Thailand</option>
+        </select>
         <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
                 className="h-10 rounded-lg bg-secondary/50 px-3 text-sm border border-border">
-          <option value="bank">Bank</option>
-          <option value="kbz_pay">KBZ Pay</option>
-          <option value="wave_pay">Wave Pay</option>
-          <option value="promptpay">PromptPay</option>
-          <option value="aya_pay">AYA Pay</option>
+          {form.country === 'MM' ? (
+            <>
+              <option value="kbz_bank">KBZ Bank</option>
+              <option value="aya_bank">AYA Bank</option>
+              <option value="cb_bank">CB Bank</option>
+              <option value="uab_bank">UAB Bank</option>
+              <option value="yoma_bank">Yoma Bank</option>
+              <option value="kbz_pay">KBZ Pay</option>
+              <option value="wave_pay">Wave Pay</option>
+              <option value="aya_pay">AYA Pay</option>
+              <option value="bank_mm">Other Bank</option>
+            </>
+          ) : (
+            <>
+              <option value="scb">SCB (Siam Commercial)</option>
+              <option value="kbank">Kasikorn Bank</option>
+              <option value="bbl">Bangkok Bank</option>
+              <option value="ktb">Krungthai Bank</option>
+              <option value="bay">Krungsri (BAY)</option>
+              <option value="tmb">TMB / TTB</option>
+              <option value="gsb">Government Savings</option>
+              <option value="promptpay">PromptPay</option>
+              <option value="truemoney">TrueMoney Wallet</option>
+              <option value="bank_th">Other Thai Bank</option>
+            </>
+          )}
         </select>
-        <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
-                className="h-10 rounded-lg bg-secondary/50 px-3 text-sm border border-border">
-          <option value="MM">Myanmar</option>
-          <option value="TH">Thailand</option>
-        </select>
-        <Input placeholder="Account number / Phone" value={form.account_info} onChange={(e) => setForm({ ...form, account_info: e.target.value })} className="bg-secondary/50 col-span-2" />
-        <Input placeholder="QR code image URL (optional)" value={form.qr_code_url} onChange={(e) => setForm({ ...form, qr_code_url: e.target.value })} className="bg-secondary/50 col-span-2" />
-        <Button disabled={saving || !form.name} onClick={() => { onSave(form); setForm({ ...form, name: '', account_info: '', qr_code_url: '' }); }}
+        <Input placeholder={form.country === 'TH' ? 'Account / PromptPay number' : 'Account number / Phone'} value={form.account_info} onChange={(e) => setForm({ ...form, account_info: e.target.value })} className="bg-secondary/50 col-span-2" />
+
+        <div className="col-span-2 space-y-2">
+          <Label className="text-xs text-muted-foreground">QR code image (upload)</Label>
+          <div className="flex items-center gap-3">
+            {form.qr_code_url && (
+              <img src={form.qr_code_url} alt="QR preview" className="w-16 h-16 rounded-lg object-cover border border-primary/20" />
+            )}
+            <label className="flex-1 cursor-pointer">
+              <input type="file" accept="image/*" onChange={handleQrUpload} className="hidden" />
+              <div className="h-11 rounded-xl bg-secondary/50 border border-dashed border-primary/30 flex items-center justify-center gap-2 text-sm">
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4 text-primary" />}
+                <span>{uploading ? 'Uploading…' : form.qr_code_url ? 'Replace QR image' : 'Upload QR image'}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <Button disabled={saving || !form.name || uploading} onClick={() => { onSave(form); setForm({ ...form, name: '', account_info: '', qr_code_url: '' }); }}
                 className="col-span-2 neon-gradient text-primary-foreground h-11 rounded-xl">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
         </Button>
@@ -469,6 +532,7 @@ const PaymentMethodEditor: React.FC<{ onSave: (p: any) => void; saving: boolean 
     </details>
   );
 };
+
 
 
 export default Admin;
