@@ -424,11 +424,11 @@ const PaymentMethodEditor: React.FC<{ onSave: (p: any) => void; saving: boolean 
     if (!file || !user) return;
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop() || 'png';
-      const path = `${user.id}/qr-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('receipts').upload(path, file, { upsert: true });
+      const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+      const path = `qr-${user.id}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('payment-qr').upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data } = supabase.storage.from('receipts').getPublicUrl(path);
+      const { data } = supabase.storage.from('payment-qr').getPublicUrl(path);
       setForm((f) => ({ ...f, qr_code_url: data.publicUrl }));
       toast({ title: 'QR uploaded' });
     } catch (err: any) {
@@ -436,6 +436,7 @@ const PaymentMethodEditor: React.FC<{ onSave: (p: any) => void; saving: boolean 
     } finally {
       setUploading(false);
     }
+
   };
 
   return (
