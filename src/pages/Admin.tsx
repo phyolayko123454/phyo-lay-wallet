@@ -215,16 +215,11 @@ const Admin: React.FC = () => {
             <TabsTrigger value="packages" className="data-[state=active]:neon-gradient data-[state=active]:text-primary-foreground rounded-xl">
               <Gamepad2 className="w-4 h-4 mr-1.5" /> Packages
             </TabsTrigger>
-            <TabsTrigger value="exchange" className="data-[state=active]:neon-gradient data-[state=active]:text-primary-foreground rounded-xl">
-              <DollarSign className="w-4 h-4 mr-1.5" /> Rate
-            </TabsTrigger>
-            <TabsTrigger value="shopping" className="data-[state=active]:neon-gradient data-[state=active]:text-primary-foreground rounded-xl">
-              <ShoppingBag className="w-4 h-4 mr-1.5" /> Shop
-            </TabsTrigger>
             <TabsTrigger value="payments" className="data-[state=active]:neon-gradient data-[state=active]:text-primary-foreground rounded-xl">
               <Landmark className="w-4 h-4 mr-1.5" /> Bank
             </TabsTrigger>
           </TabsList>
+
 
           {/* ORDERS */}
           <TabsContent value="orders" className="space-y-3">
