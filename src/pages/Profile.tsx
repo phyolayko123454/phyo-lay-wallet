@@ -22,12 +22,14 @@ const Profile: React.FC = () => {
     username: string;
     full_name: string | null;
     language: string | null;
+    country?: string | null;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     full_name: '',
+    country: 'MM' as 'MM' | 'TH',
   });
 
   useEffect(() => {
@@ -60,6 +62,7 @@ const Profile: React.FC = () => {
         setFormData({
           username: data.username || '',
           full_name: data.full_name || '',
+          country: ((data as any).country as 'MM' | 'TH') || 'MM',
         });
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -84,8 +87,9 @@ const Profile: React.FC = () => {
           username: formData.username,
           full_name: formData.full_name,
           language: language,
+          country: formData.country,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq('id', user.id);
 
       if (error) throw error;
@@ -182,6 +186,26 @@ const Profile: React.FC = () => {
                       disabled
                       className="pl-10 bg-secondary/50"
                     />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Country / နိုင်ငံ</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={formData.country === 'MM' ? 'default' : 'outline'}
+                      onClick={() => setFormData({ ...formData, country: 'MM' })}
+                      className={formData.country === 'MM' ? 'gold-gradient text-primary-foreground' : ''}
+                    >
+                      🇲🇲 Myanmar
+                    </Button>
+                    <Button
+                      variant={formData.country === 'TH' ? 'default' : 'outline'}
+                      onClick={() => setFormData({ ...formData, country: 'TH' })}
+                      className={formData.country === 'TH' ? 'gold-gradient text-primary-foreground' : ''}
+                    >
+                      🇹🇭 Thailand
+                    </Button>
                   </div>
                 </div>
 
