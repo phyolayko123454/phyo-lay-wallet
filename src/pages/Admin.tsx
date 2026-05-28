@@ -26,8 +26,14 @@ const Admin: React.FC = () => {
   const depositsQ = useQuery({
     queryKey: ['admin_deposits'],
     queryFn: async () => {
-      const { data } = await supabase.from('deposit_requests').select('*').order('created_at', { ascending: false });
-      return data ?? [];
+      const { data: deposits } = await supabase.from('deposit_requests').select('*').order('created_at', { ascending: false });
+      const ids = Array.from(new Set((deposits ?? []).map((d: any) => d.user_id)));
+      let profileMap: Record<string, any> = {};
+      if (ids.length) {
+        const { data: profs } = await supabase.from('profiles').select('id, username, country').in('id', ids);
+        profileMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p]));
+      }
+      return (deposits ?? []).map((d: any) => ({ ...d, _profile: profileMap[d.user_id] }));
     },
     enabled: !!user,
   });
@@ -267,10 +273,18 @@ const Admin: React.FC = () => {
                     </div>
                   )}
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-display font-bold">{Number(d.amount).toLocaleString()} {d.currency}</span>
                       <StatusBadge status={d.status} />
+                      {d._profile?.country && (
+                        <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">
+                          {d._profile.country === 'MM' ? '🇲🇲 MM' : '🇹🇭 TH'}
+                        </Badge>
+                      )}
                     </div>
+                    {d._profile?.username && (
+                      <p className="text-xs text-foreground mt-0.5">@{d._profile.username}</p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-0.5">{new Date(d.created_at).toLocaleString()}</p>
                   </div>
                 </div>
